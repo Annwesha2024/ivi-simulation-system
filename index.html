@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IVI System — Interactive Simulation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <h1>IN-VEHICLE INFOTAINMENT (IVI) SYSTEM</h1>
+    <p>Module 6 &middot; Conceptual Architecture &amp; Interactive Simulation</p>
+  </div>
+  <div class="topbar-badge">
+    <span class="dot dot-online"></span> SYSTEM ONLINE
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ LEFT: SYSTEM STATUS ============ -->
+  <section class="panel status-panel" aria-label="System Status">
+    <h2 class="panel-title">System Status</h2>
+    <dl class="status-list">
+      <div class="status-row"><dt>System</dt><dd id="st-system" class="ok">ONLINE</dd></div>
+      <div class="status-row"><dt>Current Mode</dt><dd id="st-mode">IDLE</dd></div>
+      <div class="status-row"><dt>Media</dt><dd id="st-media">STOPPED</dd></div>
+      <div class="status-row"><dt>Navigation</dt><dd id="st-nav">INACTIVE</dd></div>
+      <div class="status-row"><dt>Projection</dt><dd id="st-proj">INACTIVE</dd></div>
+      <div class="status-row"><dt>Call</dt><dd id="st-call">NO CALL</dd></div>
+      <div class="status-row"><dt>Vehicle Network</dt><dd id="st-vehicle" class="ok">CONNECTED</dd></div>
+      <div class="status-row"><dt>GPS</dt><dd id="st-gps" class="ok">AVAILABLE</dd></div>
+    </dl>
+
+    <div class="banner" id="scenario-banner">STATUS: SYSTEM IDLE</div>
+
+    <h2 class="panel-title legend-title">Legend</h2>
+    <ul class="legend">
+      <li><span class="swatch swatch-normal"></span> Normal component</li>
+      <li><span class="swatch swatch-active"></span> Active / processing</li>
+      <li><span class="swatch swatch-flow"></span> Data flow (live)</li>
+      <li><span class="swatch swatch-external"></span> External device</li>
+      <li><span class="swatch swatch-vehicle"></span> Vehicle-side component</li>
+      <li><span class="swatch swatch-paused"></span> Paused / interrupted</li>
+    </ul>
+  </section>
+
+  <!-- ============ CENTER: ARCHITECTURE DIAGRAM ============ -->
+  <section class="panel diagram-panel" aria-label="Architecture Diagram">
+    <h2 class="panel-title">Architecture &amp; Live Data Flow</h2>
+    <div class="svg-wrap">
+      <svg id="diagram" viewBox="0 0 1320 700" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- boundary containers -->
+        <rect class="boundary" x="140" y="140" width="980" height="500" rx="18"></rect>
+        <text class="boundary-label" x="160" y="168">IVI SYSTEM</text>
+
+        <rect class="boundary boundary-vehicle" x="1140" y="160" width="180" height="210" rx="14"></rect>
+        <text class="boundary-label boundary-label-vehicle" x="1152" y="182">VEHICLE SYSTEM</text>
+
+        <!-- edges (drawn first, under nodes) -->
+        <g id="edges">
+          <path id="e-driver-hmi" class="edge" d="M200,60 L460,58"></path>
+          <path id="e-hmi-phone" class="edge edge-dashed" d="M700,58 L1080,60"></path>
+          <path id="e-hmi-controller" class="edge" d="M580,96 L580,170"></path>
+          <path id="e-controller-vehiclenetwork" class="edge edge-dashed" d="M700,205 L1160,205"></path>
+          <path id="e-vehiclenetwork-ecus" class="edge edge-dashed" d="M1230,235 L1230,290"></path>
+          <path id="e-controller-media" class="edge" d="M580,240 L280,300"></path>
+          <path id="e-controller-nav" class="edge" d="M580,240 L580,300"></path>
+          <path id="e-controller-proj" class="edge" d="M580,240 L890,300"></path>
+          <path id="e-nav-proj" class="edge" d="M700,335 L780,335"></path>
+          <path id="e-media-audiohal" class="edge" d="M280,370 L280,420"></path>
+          <path id="e-audiohal-speakers" class="edge" d="M280,480 L280,530"></path>
+          <path id="e-gps-nav" class="edge" d="M480,420 L580,370"></path>
+          <path id="e-mapdb-nav" class="edge" d="M680,420 L580,370"></path>
+          <path id="e-proj-displayhal" class="edge" d="M890,370 L890,420"></path>
+          <path id="e-displayhal-hud" class="edge" d="M890,480 L890,530"></path>
+        </g>
+
+        <!-- edge labels -->
+        <g class="edge-labels">
+          <text x="212" y="50">Touch / Voice / Commands</text>
+          <text x="710" y="50">Projection / Media Data</text>
+          <text x="592" y="130">User Commands</text>
+          <text x="712" y="198">Vehicle Data (CAN)</text>
+          <text x="1236" y="266">CAN/LIN</text>
+          <text x="335" y="282">Media Cmd</text>
+          <text x="588" y="258">Nav Request</text>
+          <text x="748" y="282">Projection Cmd</text>
+          <text x="702" y="328">Route / Map Data</text>
+          <text x="288" y="398">Audio (PCM)</text>
+          <text x="288" y="508">Audio Out</text>
+          <text x="418" y="408">GPS Data</text>
+          <text x="618" y="408">Map Data</text>
+          <text x="898" y="398">Display Content</text>
+          <text x="898" y="508">Video Out</text>
+        </g>
+
+        <!-- moving data-flow dot -->
+        <circle id="flow-dot" class="flow-dot" r="7" cx="-100" cy="-100"></circle>
+
+        <!-- nodes -->
+        <g id="nodes">
+          <g class="node cat-external" id="n-driver" data-x="20" data-y="30" data-w="180" data-h="60">
+            <rect x="20" y="30" width="180" height="60" rx="10"></rect>
+            <text class="n-title" x="110" y="55" text-anchor="middle">DRIVER</text>
+            <text class="n-sub" x="110" y="74" text-anchor="middle">User Input</text>
+          </g>
+
+          <g class="node cat-hub" id="n-hmi" data-x="460" data-y="20" data-w="240" data-h="76">
+            <rect x="460" y="20" width="240" height="76" rx="10"></rect>
+            <text class="n-title" x="580" y="50" text-anchor="middle">IVI HMI</text>
+            <text class="n-sub" x="580" y="70" text-anchor="middle">Touch Display / UI</text>
+          </g>
+
+          <g class="node cat-external" id="n-phone" data-x="1080" data-y="30" data-w="200" data-h="60">
+            <rect x="1080" y="30" width="200" height="60" rx="10"></rect>
+            <text class="n-title" x="1180" y="55" text-anchor="middle">SMARTPHONE</text>
+            <text class="n-sub" x="1180" y="74" text-anchor="middle">Android Auto / CarPlay</text>
+          </g>
+
+          <g class="node cat-hub" id="n-controller" data-x="460" data-y="170" data-w="240" data-h="70">
+            <rect x="460" y="170" width="240" height="70" rx="10"></rect>
+            <text class="n-title" x="580" y="199" text-anchor="middle">IVI CONTROLLER</text>
+            <text class="n-sub" x="580" y="219" text-anchor="middle">Middleware / Routing</text>
+          </g>
+
+          <g class="node cat-vehicle" id="n-vehiclenetwork" data-x="1160" data-y="175" data-w="140" data-h="60">
+            <rect x="1160" y="175" width="140" height="60" rx="10"></rect>
+            <text class="n-title" x="1230" y="200" text-anchor="middle">VEHICLE NET.</text>
+            <text class="n-sub" x="1230" y="219" text-anchor="middle">CAN / LIN</text>
+          </g>
+
+          <g class="node cat-vehicle" id="n-ecus" data-x="1160" data-y="290" data-w="140" data-h="60">
+            <rect x="1160" y="290" width="140" height="60" rx="10"></rect>
+            <text class="n-title" x="1230" y="315" text-anchor="middle">VEHICLE ECUs</text>
+            <text class="n-sub" x="1230" y="334" text-anchor="middle">Speed / Gear</text>
+          </g>
+
+          <g class="node cat-media" id="n-media" data-x="170" data-y="300" data-w="220" data-h="70">
+            <rect x="170" y="300" width="220" height="70" rx="10"></rect>
+            <text class="n-title" x="280" y="329" text-anchor="middle">MEDIA SERVICE</text>
+            <text class="n-sub" x="280" y="349" text-anchor="middle" id="media-sub">Playback</text>
+          </g>
+
+          <g class="node cat-nav" id="n-nav" data-x="460" data-y="300" data-w="240" data-h="70">
+            <rect x="460" y="300" width="240" height="70" rx="10"></rect>
+            <text class="n-title" x="580" y="329" text-anchor="middle">NAVIGATION SERVICE</text>
+            <text class="n-sub" x="580" y="349" text-anchor="middle">Maps / Routing</text>
+          </g>
+
+          <g class="node cat-proj" id="n-proj" data-x="780" data-y="300" data-w="220" data-h="70">
+            <rect x="780" y="300" width="220" height="70" rx="10"></rect>
+            <text class="n-title" x="890" y="329" text-anchor="middle">PROJECTION SERVICE</text>
+            <text class="n-sub" x="890" y="349" text-anchor="middle">Screen / HUD</text>
+          </g>
+
+          <g class="node cat-media" id="n-audiohal" data-x="170" data-y="420" data-w="220" data-h="60">
+            <rect x="170" y="420" width="220" height="60" rx="10"></rect>
+            <text class="n-title" x="280" y="445" text-anchor="middle">AUDIO HAL</text>
+            <text class="n-sub" x="280" y="464" text-anchor="middle">Hardware Abstraction</text>
+          </g>
+
+          <g class="node cat-nav" id="n-gps" data-x="400" data-y="420" data-w="160" data-h="60">
+            <rect x="400" y="420" width="160" height="60" rx="10"></rect>
+            <text class="n-title" x="480" y="445" text-anchor="middle">GPS MODULE</text>
+            <text class="n-sub" x="480" y="464" text-anchor="middle">GNSS Receiver</text>
+          </g>
+
+          <g class="node cat-proj" id="n-displayhal" data-x="780" data-y="420" data-w="220" data-h="60">
+            <rect x="780" y="420" width="220" height="60" rx="10"></rect>
+            <text class="n-title" x="890" y="445" text-anchor="middle">DISPLAY HAL</text>
+            <text class="n-sub" x="890" y="464" text-anchor="middle">Display Interface</text>
+          </g>
+
+          <g class="node cat-media" id="n-speakers" data-x="170" data-y="530" data-w="220" data-h="60">
+            <rect x="170" y="530" width="220" height="60" rx="10"></rect>
+            <text class="n-title" x="280" y="555" text-anchor="middle">VEHICLE SPEAKERS</text>
+            <text class="n-sub" x="280" y="574" text-anchor="middle">Audio Output</text>
+          </g>
+
+          <g class="node cat-nav" id="n-mapdb" data-x="600" data-y="420" data-w="160" data-h="60">
+            <rect x="600" y="420" width="160" height="60" rx="10"></rect>
+            <text class="n-title" x="680" y="445" text-anchor="middle">MAP DATABASE</text>
+            <text class="n-sub" x="680" y="464" text-anchor="middle">Stored Map Data</text>
+          </g>
+
+          <g class="node cat-proj" id="n-hud" data-x="780" data-y="530" data-w="220" data-h="60">
+            <rect x="780" y="530" width="220" height="60" rx="10"></rect>
+            <text class="n-title" x="890" y="555" text-anchor="middle">CENTRAL DISPLAY / HUD</text>
+            <text class="n-sub" x="890" y="574" text-anchor="middle">Visual Output</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT: CONTROLS ============ -->
+  <section class="panel controls-panel" aria-label="Simulation Controls">
+    <h2 class="panel-title">Simulation Controls</h2>
+    <button class="btn btn-media" id="btn-play-music">▶ PLAY MUSIC</button>
+    <button class="btn btn-nav" id="btn-start-nav">⬈ START NAVIGATION</button>
+    <button class="btn btn-proj" id="btn-project-route">▤ PROJECT ROUTE</button>
+    <button class="btn btn-call" id="btn-incoming-call">☎ INCOMING CALL</button>
+    <button class="btn btn-endcall" id="btn-end-call">✕ END CALL</button>
+    <button class="btn btn-reset" id="btn-reset">⟲ RESET SIMULATION</button>
+
+    <div class="hint">
+      Click a control to run that scenario. Buttons disable briefly while an
+      animation is in progress so steps don't overlap.
+    </div>
+  </section>
+
+  <!-- ============ EVENT LOG ============ -->
+  <section class="panel log-panel" aria-label="Simulation Event Log">
+    <div class="log-header">
+      <h2 class="panel-title">Simulation Event Log</h2>
+      <button class="btn-clear" id="btn-clear-log">CLEAR LOG</button>
+    </div>
+    <div class="log-box" id="log-box">
+      <div class="log-line log-line-muted">[--:--:--] Waiting for first action…</div>
+    </div>
+  </section>
+
+  <!-- ============ EXPLANATION ============ -->
+  <section class="panel explain-panel" aria-label="How it works">
+    <h2 class="panel-title">How the IVI System Works</h2>
+    <ol class="explain-list">
+      <li>The driver interacts with the IVI HMI (touch, voice, or buttons).</li>
+      <li>The IVI Controller / Middleware receives and routes every command.</li>
+      <li>Media Service manages audio playback and streaming sources.</li>
+      <li>Navigation Service combines GPS data and Map Database data to plan routes.</li>
+      <li>Projection Service turns route/media data into something that can be displayed.</li>
+      <li>Audio HAL sends processed audio to the Vehicle Speakers.</li>
+      <li>Display HAL sends UI/video output to the Central Display or HUD.</li>
+      <li>The Vehicle Network (CAN/LIN) connects the IVI system with Vehicle ECUs.</li>
+      <li>A connected smartphone can provide Android Auto / Apple CarPlay projection.</li>
+    </ol>
+  </section>
+
+  <!-- ============ ACADEMIC INFO ============ -->
+  <section class="panel academic-panel" aria-label="Project Information">
+    <h2 class="panel-title">Project Information</h2>
+    <table class="academic-table">
+      <tr><th>Project</th><td>Conceptual IVI Architecture and Interactive Simulation</td></tr>
+      <tr><th>Module</th><td>Module 6 — In-Vehicle Infotainment (IVI) System</td></tr>
+      <tr><th>Domain</th><td>Automotive / In-Vehicle Infotainment</td></tr>
+      <tr><th>Project Type</th><td>Conceptual Architecture + Browser-Based Simulation</td></tr>
+      <tr><th>Technologies</th><td>HTML, CSS, JavaScript, SVG (no frameworks, no internet required)</td></tr>
+      <tr><th>Purpose</th><td>Demonstrate media, navigation, projection and system interaction in an IVI architecture.</td></tr>
+    </table>
+    <p class="disclaimer">
+      This is a conceptual educational simulation intended to demonstrate IVI component
+      interactions and data flow. It does not implement a production Android Automotive
+      or vehicle infotainment stack.
+    </p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  IVI System — Interactive Simulation &middot; Module 6 &middot; Runs fully offline in the browser
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
